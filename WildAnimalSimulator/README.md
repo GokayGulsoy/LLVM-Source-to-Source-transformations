@@ -1,4 +1,4 @@
-# MatrixMultiplicationTypeModifier
+# izzyrefactor (Name of the tool)
 This tool is used to transform member function declaration `walk()` into `run()` and member function call `walk()` which is called via Cat subclass of Animal class into `run()`
 
 ## How to build the tool 
