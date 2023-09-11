@@ -1,6 +1,3 @@
-Renamed function from 'walk' to 'run': walk
-Renamed member function call from 'walk' to 'run'
-Modified Code:
 #include <iostream>
 
 using namespace std;
