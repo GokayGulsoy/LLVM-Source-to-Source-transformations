@@ -11,7 +11,6 @@ into `float` type
 
 
 `set(LLVM_LINK_COMPONENTS support)
-
 add_clang_executable(matrixMultiplicationTypeModifier
 	matrixMultiplicationTypeModifier.cpp
   )
@@ -38,7 +37,6 @@ echo 'add_subdirectory(matrixMultiplicationTypeModifier)' >> clang-tools-extra/C
 4.Add the following contents to CMakeLists.txt file created in the step 3
 
 `set(LLVM_LINK_COMPONENTS support)
-
 add_clang_executable(matrixMultiplicationTypeModifier
 	matrixMultiplicationTypeModifier.cpp
   )
