@@ -9,6 +9,7 @@ into `float` type
 3.Then we need to create another CMakeLists.txt file under the matrixMultiplicationTypeModifier directory which we have created in the step 1
 4.We need to add the following contents to this CMakeLists.txt file
 
+`
 set(LLVM_LINK_COMPONENTS support)
 
 add_clang_executable(matrixMultiplicationTypeModifier
@@ -24,6 +25,7 @@ target_link_libraries(matrixMultiplicationTypeModifier
   clangTooling
   clangEdit
   )
+`
 
 5.After adding the above contents to CMakeLists.txt file, we need to place the source code for the tool under the matrixMultiplicationTypeModifier directory (source code for the file is provided in matrixMultiplicationTypeModifier.cpp)
 
@@ -35,7 +37,7 @@ target_link_libraries(matrixMultiplicationTypeModifier
 echo 'add_subdirectory(matrixMultiplicationTypeModifier)' >> clang-tools-extra/CMakeLists.txt
 3.vim clang-tools-extra/matrixMultiplicationTypeModifier/CMakeLists.txt
 4.Add the following contents to CMakeLists.txt file created in the step 3
-
+`
 set(LLVM_LINK_COMPONENTS support)
 
 add_clang_executable(matrixMultiplicationTypeModifier
@@ -51,6 +53,7 @@ target_link_libraries(matrixMultiplicationTypeModifier
   clangTooling
   clangEdit
   )
+`
 
 5.cd ~/clang-llvm-project/build
 6.make
