@@ -30,17 +30,6 @@ target_link_libraries(matrixMultiplicationTypeModifier
 5.After adding the above contents to CMakeLists.txt file, we need to place
 the source code for the tool under the matrixMultiplicationTypeModifier directory (source code for the file is provided in matrixMultiplicationTypeModifier.cpp)
 
-6.Finally we need to build the project by changing directory to build folder and executing the set(LLVM_LINK_COMPONENTS support)
-
-add_clang_executable(matrixMultiplicationTypeModifier
-	matrixMultiplicationTypeModifier.cpp
-  )
-target_link_libraries(matrixMultiplicationTypeModifier
-  PRIVATE
-  clangAST
-  clangASTMatchers5.After adding the above contents to CMakeLists.txt file, we need to place
-the source code for the tool under the matrixMultiplicationTypeModifier directory (source code for the file is provided in matrixMultiplicationTypeModifier.cpp)
-
 6.Finally we need to build the tool by changing the current directory to 
 build directory of LLVM and execute the `make` command from terminal
 
