@@ -53,5 +53,5 @@ target_link_libraries(matrixMultiplicationTypeModifier
 5. cd ~/clang-llvm-project/build
 6. make
 
-## Command to be exectued from terminal to run the tool on C++ source codefile
+## Command to be exectued from terminal to run the tool on C++ source code file
 `matrixMultiplicationTypeModifier matrixMultiplication.cpp --`
