@@ -15,3 +15,11 @@ changes them from `walk()` to `run()`.
 This is a simple LibTooling based tool to apply source-to-source transformation to matrix multiplication algorithm
 implemented in CUDA which detects double type vector declarations and double type variable declarations which are 
 involved in matrix multiplication related operations and convert their data type to float.
+
+## CUDAMatrixMultiplicationTransformerIntegratedTool
+This is a simple LibTooling based tool to apply source-to-source transformation to matrix multiplication algorithm
+implemented in CUDA which enables user to give command line parameters that can be used to provide how many threads
+to be used in the CUDA kernel call statement and also provides an option to change double types into float types in
+matrix related operations as provided in the above version of the tool, but in this version these transformations are
+optional. By default number of threads to be launched within the kernel call in the transformed code is set to 64 and
+conversion from double to float type is not enabled unless command line parameter is explicitly provided.
