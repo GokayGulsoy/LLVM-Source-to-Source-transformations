@@ -57,7 +57,14 @@ target_link_libraries(CUDAMatrixMultiplicationModifier
 ## Command to be exectued from terminal to run the tool on CUDA source code file
 
 ### Following version uses --threads=<value> command line argument to set the value of threads to be launched
-`CUDAMatrixMultiplicationModifier --threads=128 parallelMatrixMultiplication.cu -- --cuda-gpu-arch=sm_75`
+```shell
+CUDAMatrixMultiplicationModifier --threads=128 parallelMatrixMultiplication.cu -- --cuda-gpu-arch=sm_75
+```
+
+### Following version uses --reduction-ration=<value> command line argument to set reduction ratio for threads
+```shell
+CUDAMatrixMultiplicationModifier --threads=128 --reduction-ratio=0.25 parallelMatrixMultiplication.cu -- --cuda-gpu-arch=sm_75
+```
 
 ### Following version uses --convert-double-to-float to enable data type transformation from double to float type
 `CUDAMatrixMultiplicationModifier --threads=256 --convert-double-to-float parallelMatrixMultiplication.cu -- --cuda-gpu-arch=sm_75`
