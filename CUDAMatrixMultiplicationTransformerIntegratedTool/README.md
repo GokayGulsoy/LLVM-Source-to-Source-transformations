@@ -67,4 +67,6 @@ CUDAMatrixMultiplicationModifier --threads=128 --reduction-ratio=0.25 parallelMa
 ```
 
 ### Following version uses --convert-double-to-float to enable data type transformation from double to float type
-`CUDAMatrixMultiplicationModifier --threads=256 --convert-double-to-float parallelMatrixMultiplication.cu -- --cuda-gpu-arch=sm_75`
+```shell
+CUDAMatrixMultiplicationModifier --threads=256 --reduction-ratio=0.25 --convert-double-to-float parallelMatrixMultiplication.cu -- --cuda-gpu-arch=sm_75
+```
