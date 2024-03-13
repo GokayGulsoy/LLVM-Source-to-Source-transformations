@@ -10,7 +10,8 @@ related operations into `float` type
 4. We need to add the following contents to this CMakeLists.txt file
 
 
-`set(LLVM_LINK_COMPONENTS support)
+```shell
+set(LLVM_LINK_COMPONENTS support)
 add_clang_executable(CUDAMatrixMultiplicationModifier
 	CUDAmatrixMultiplicationModifier.cpp
   )
@@ -23,7 +24,8 @@ target_link_libraries(CUDAMatrixMultiplicationModifier
   clangSerialization
   clangTooling
   clangEdit
-  )`
+  )
+```
 
 5.After adding the above contents to CMakeLists.txt file, we need to place the source code for the tool under the CUDAMatrixMultiplicationModifier directory (source code for the file is provided in CUDAMatrixMultiplicationModifier.cpp)
 
@@ -36,20 +38,22 @@ target_link_libraries(CUDAMatrixMultiplicationModifier
 4. vim clang-tools-extra/CUDAMatrixMultiplicationModifier/CMakeLists.txt
 5. Add the following contents to CMakeLists.txt file created in the step 4
 
-`set(LLVM_LINK_COMPONENTS support)
+```shell
+set(LLVM_LINK_COMPONENTS support)
 add_clang_executable(CUDAMatrixMultiplicationModifier
-	CUDAMatrixMultiplicationModifier.cpp
-  )
+CUDAMatrixMultiplicationModifier.cpp
+)
 target_link_libraries(CUDAMatrixMultiplicationModifier
-  PRIVATE
-  clangAST
-  clangASTMatchers
-  clangBasic
-  clangFrontend
-  clangSerialization
-  clangTooling
-  clangEdit
-  )`
+PRIVATE
+clangAST
+clangASTMatchers
+clangBasic
+clangFrontend
+clangSerialization
+clangTooling
+clangEdit
+)
+```
 
 5. cd ~/llvm-project/build
 6. make
