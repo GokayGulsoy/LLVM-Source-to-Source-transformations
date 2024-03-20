@@ -40,11 +40,11 @@ cl::opt<bool>
                          cl::init(false));
 
 cl::opt<bool>
-    ChangeKernelCallParameter("change-Kernel-block-parameter", // command line option allowing change of Kernel lauch statement parameters
+    ChangeKernelCallParameter("change-Kernel", // command line option allowing change of Kernel lauch statement parameters
                               cl::desc("Change the number of threads inside the block"),
                               cl::init(false));
 
-cl::opt<int> KernelParamNum("kernel-param-num",                                            // command line option to specify which kernel lauch parameter to modify 1 => change first parameter
+cl::opt<int> KernelParamNum("kernelParam-num",                                             // command line option to specify which kernel lauch parameter to modify 1 => change first parameter
                             cl::desc("Specify which kernel parameter to modify (1 or 2)"), // 2 => change second parameter (by default block)
                             cl::init(2));
 
@@ -159,48 +159,65 @@ public:
     // Visit call expressions and change the second parameter in CUDA kernel calls.
     bool VisitCallExpr(CallExpr *CE)
     {
-        if (ChangeKernelCallParameter)
+        if (ChangeKernelCallParameter && isCUDAKernelCall(CE))
         {
-            if (isCUDAKernelCall(CE))
+            // Locate the entire call expression.
+            SourceLocation StartLoc = CE->getCallee()->getBeginLoc();       // Start of the kernel function name.
+            SourceLocation EndLoc = CE->getRParenLoc().getLocWithOffset(1); // End of the kernel call
+
+            if (!StartLoc.isInvalid() && !EndLoc.isInvalid())
             {
-                SourceLocation BeginLoc = CE->getExprLoc();
-                SourceLocation EndLoc = CE->getRParenLoc();
+                StringRef CallText = Lexer::getSourceText(CharSourceRange::getTokenRange(StartLoc, EndLoc), Context->getSourceManager(), Context->getLangOpts());
 
-                if (!BeginLoc.isInvalid() && !EndLoc.isInvalid())
+                llvm::errs() << "Call text is: " << CallText << "\n";
+                llvm::errs() << "Call text contains (<<<): " << CallText.contains("<<<") << "\n";
+                if (CallText.contains("<<<") && CallText.contains(">>>"))
                 {
-                    StringRef CallText = Lexer::getSourceText(CharSourceRange::getCharRange(BeginLoc, EndLoc),
-                                                              Context->getSourceManager(), Context->getLangOpts());
+                    llvm::errs() << "Inside the CUDA kernel call: "
+                                 << "\n";
+                    size_t KernelConfigStart = CallText.find("<<<") + 3;
+                    size_t KernelConfigEnd = CallText.find(">>>", KernelConfigStart);
 
-                    if (CallText.contains("<<<") && CallText.contains(">>>"))
+                    // Extract the kernel configuration parameters.
+                    std::string KernelConfig = CallText.slice(KernelConfigStart, KernelConfigEnd).str();
+                    size_t CommaPos = KernelConfig.find(',');
+
+                    // Parse the grid and block parameters.
+                    std::string gridParam = KernelConfig.substr(0, CommaPos);
+                    std::string blockParam = KernelConfig.substr(CommaPos + 1);
+
+                    // Prepare the new parameter value based on threads and reduction ratio.
+                    int ThreadValueInt = stoi(ThreadsValue);
+                    std::string NewThreadsValue = std::to_string(ThreadValueInt - (ThreadValueInt * ThreadReductionRatio) / 100);
+
+                    // Decide which parameter to replace based on KernelParamNum.
+                    std::string ReplacementConfig;
+                    if (KernelParamNum == 1)
                     {
-                        std::string CallTextStr = CallText.str();
-                        size_t Start = CallTextStr.find("<<<") + 3;  // Start after '<<<'
-                        size_t End = CallTextStr.find(">>>", Start); // Find the end '>>>'
-                        std::string Parameters = CallTextStr.substr(Start, End - Start);
-
-                        std::istringstream iss(Parameters);
-                        std::string firstParam, secondParam;
-                        getline(iss, firstParam, ',');
-                        getline(iss, secondParam);
-
-                        int ThreadValueInt = stoi(ThreadsValue);
-                        int ReducedThreadValue = ThreadValueInt - (ThreadValueInt * ThreadReductionRatio) / 100;
-                        std::string NewThreadsValue = std::to_string(ReducedThreadValue);
-
-                        std::string ReplacementParameters = Parameters;
-                        if (KernelParamNum == 1)
-                        {
-                            ReplacementParameters = NewThreadsValue + "," + secondParam;
-                        }
-                        else if (KernelParamNum == 2)
-                        {
-                            ReplacementParameters = firstParam + "," + NewThreadsValue;
-                        }
-
-                        std::string ReplacementText = "<<<" + ReplacementParameters + ">>>";
-                        SourceRange ReplacementRange(BeginLoc, EndLoc.getLocWithOffset(End - Start + 3));
-                        R.ReplaceText(ReplacementRange, ReplacementText);
+                        llvm::errs() << "Kernel call changed First parameter" << CallText << "\n";
+                        ReplacementConfig = NewThreadsValue + "," + blockParam;
                     }
+                    else if (KernelParamNum == 2)
+                    {
+                        llvm::errs() << "Kernel call changed Second parameter" << CallText << "\n";
+                        ReplacementConfig = gridParam + "," + NewThreadsValue;
+                    }
+                    else
+                    {
+                        llvm::errs() << "Invalid KernelParamNum value: " << KernelParamNum << ". Expected 1 or 2.\n";
+                        return false;
+                    }
+
+                    // Construct the replacement text.
+                    std::string ReplacementText = "<<<" + ReplacementConfig + ">>>";
+
+                    // Calculate the source range for the replacement.
+                    SourceLocation ReplacementBegin = StartLoc.getLocWithOffset(KernelConfigStart - 3); // Adjust for the offset of "<<<".
+                    SourceLocation ReplacementEnd = StartLoc.getLocWithOffset(KernelConfigEnd + 2);     // Adjust for the offset of ">>>".
+                    SourceRange ReplacementRange(ReplacementBegin, ReplacementEnd);
+
+                    // Perform the replacement.
+                    R.ReplaceText(ReplacementRange, ReplacementText);
                 }
             }
             return true;
@@ -225,9 +242,11 @@ private:
                 StringRef CallText = Lexer::getSourceText(CharSourceRange::getCharRange(BeginLoc, EndLoc),
                                                           Context->getSourceManager(), Context->getLangOpts());
 
+                // llvm::errs() << "Call text is: " << CallText << "\n";
                 // llvm::outs() << "Any Call Expression: " << CallText << "\n";
-                if (CallText.starts_with("<<<"))
+                if (CallText.contains("<<<") && CallText.contains(">>>"))
                 {
+                    llvm::errs() << "Found CUDA kernel call: " << CallText << "\n";
                     // llvm::outs() << "Found CUDA Kernel Call: " << CallText << "\n";
                     return true;
                 }
@@ -311,4 +330,3 @@ int main(int argc, const char **argv)
 
     return 0;
 }
-
